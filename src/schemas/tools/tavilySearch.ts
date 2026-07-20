@@ -13,7 +13,7 @@ export const tavilySearchToolDef = {
 };
 
 interface TavilySearchToolOutput {
-  results: Array<{ title: string; url: string; content: string; score: number }>;
+  results: Array<{ title: string; url: string; score: number }>;
   error?: ToolErrorCode;
   error_detail?: string;
 }
@@ -23,7 +23,11 @@ export async function handleTavilySearch(
 ): Promise<TavilySearchToolOutput> {
   try {
     const config = getConfig();
-    const results = await tavilySearch(config.tavilyApiKey, input);
+    const rawResults = await tavilySearch(config.tavilyApiKey, input);
+    // Strip field `content` — terlalu panjang dan tidak diperlukan LLM pemanggil.
+    // LLM cukup menerima url + title + score untuk memutuskan URL mana yang perlu
+    // dianalisis lebih lanjut via analyze_journal atau verify_pdf.
+    const results = rawResults.map(({ content: _content, ...rest }) => rest);
     return { results };
   } catch (err) {
     const code = err instanceof ToolError ? err.code : "upstream_search_failed";
