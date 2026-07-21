@@ -4,6 +4,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { authMiddleware } from "./authMiddleware.js";
 import { registerFaviconRoute } from "./favicon.js";
+import { registerRestRoutes } from "./restRoutes.js";
 import { getConfig } from "../config.js";
 
 export function createHttpApp(mcpServer: McpServer): Express {
@@ -81,6 +82,7 @@ export function createHttpApp(mcpServer: McpServer): Express {
   });
 
   registerFaviconRoute(app);
+  registerRestRoutes(app);
 
   // --- 404 fallback untuk path tidak dikenal ---
   app.use((req: Request, res: Response) => {

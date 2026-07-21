@@ -38,6 +38,80 @@ Endpoint MCP untuk dipasang di Claude:
 http://localhost:3000/mcp?key=ISI_MCP_API_KEY_ANDA
 ```
 
+## REST API (HTTP biasa)
+
+Selain MCP, setiap tool juga bisa dipanggil lewat REST endpoint HTTP biasa —
+berguna untuk integrasi dengan backend non-MCP, Postman, curl, atau agent yang
+ingin akses JSON langsung tanpa protokol MCP.
+
+### Autentikasi
+
+Sama seperti MCP endpoint: API key dikirim lewat query string `?key=...`.
+
+```
+POST /api/verify-pdf?key=ISI_MCP_API_KEY_ANDA
+```
+
+Kalau key salah atau tidak ada → `401 { "error": "invalid_or_missing_api_key" }`.
+
+### Daftar endpoint
+
+| Method | Path | Deskripsi |
+|--------|------|-----------|
+| POST | `/api/tavily-search` | Pencarian web umum (Tavily Search) |
+| POST | `/api/tavily-extract` | Ekstraksi konten halaman web |
+| POST | `/api/tavily-crawl` | Crawl/jelajahi situs |
+| POST | `/api/verify-pdf` | Verifikasi magic bytes PDF dari URL |
+| POST | `/api/analyze-journal-standard` | Analisis jurnal standar (worker round-robin) |
+| POST | `/api/analyze-journal-custom` | Analisis jurnal dengan prompt/field kustom |
+| POST | `/api/search-and-check-journals` | Tool komposit: search → verify → judge |
+| GET | `/api/tools` | Daftar semua tool yang tersedia (metadata) |
+
+Semua endpoint POST menerima `Content-Type: application/json`. Input body
+mengikuti schema yang sama dengan tool MCP — lihat `src/schemas/toolSchemas.ts`.
+
+### Contoh request
+
+```bash
+# Verifikasi PDF
+curl -X POST "http://localhost:3000/api/verify-pdf?key=ISI_MCP_API_KEY_ANDA" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com/paper.pdf"}'
+```
+
+Response sukses (`200`):
+```json
+{
+  "url": "https://example.com/paper.pdf",
+  "is_pdf": true,
+  "detected_signature": "%PDF-",
+  "http_status": 200
+}
+```
+
+Response validasi gagal (`400`):
+```json
+{
+  "error": "invalid_input",
+  "error_detail": "url: url harus valid"
+}
+```
+
+Response tanpa/ salah API key (`401`):
+```json
+{
+  "error": "invalid_or_missing_api_key"
+}
+```
+
+### Discovery
+
+```bash
+curl "http://localhost:3000/api/tools?key=ISI_MCP_API_KEY_ANDA"
+```
+
+Mengembalikan daftar 7 tool dengan nama, method HTTP, dan path masing-masing.
+
 ## Tools yang tersedia
 
 | Tool | Deskripsi |
