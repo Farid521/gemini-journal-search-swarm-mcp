@@ -16,6 +16,8 @@ function emptyAnalysisFields(): Pick<
   | "has_basic_equations"
   | "confidence"
   | "reason"
+  | "journal_title"
+  | "apa_citation"
 > {
   return {
     worker_id: null,
@@ -25,6 +27,8 @@ function emptyAnalysisFields(): Pick<
     has_basic_equations: null,
     confidence: null,
     reason: null,
+    journal_title: null,
+    apa_citation: null,
   };
 }
 
@@ -148,6 +152,8 @@ export async function runJournalAnalysis(
       has_basic_equations: result.has_basic_equations,
       confidence: result.confidence,
       reason: result.reason,
+      journal_title: result.journal_title ?? null,
+      apa_citation: result.apa_citation ?? null,
     };
 
     // extra_fields_requested (§5.2) — best-effort, tidak divalidasi ketat.

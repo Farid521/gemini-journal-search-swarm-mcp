@@ -29,6 +29,8 @@ function emptyResultFor(url: string, errorCode: AnalyzeJournalOutput["error"]): 
     has_basic_equations: null,
     confidence: null,
     reason: null,
+    journal_title: null,
+    apa_citation: null,
     error: errorCode,
   };
 }

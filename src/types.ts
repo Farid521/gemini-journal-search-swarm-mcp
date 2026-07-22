@@ -34,6 +34,8 @@ export interface GeminiJudgeResult {
   has_basic_equations: boolean;
   confidence: Confidence;
   reason: string;
+  journal_title?: string;
+  apa_citation?: string;
   [extraField: string]: unknown; // untuk extra_fields_requested (§5.2)
 }
 
@@ -47,6 +49,8 @@ export interface AnalyzeJournalOutput {
   has_basic_equations: boolean | null;
   confidence: Confidence | null;
   reason: string | null;
+  journal_title: string | null;
+  apa_citation: string | null;
   error?: ToolErrorCode;
   error_detail?: string;
   [extraField: string]: unknown;

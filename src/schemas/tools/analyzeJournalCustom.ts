@@ -36,6 +36,8 @@ export async function handleAnalyzeJournalCustom(
       has_basic_equations: null,
       confidence: null,
       reason: null,
+      journal_title: null,
+      apa_citation: null,
       error: "internal_error",
       error_detail: err instanceof Error ? err.message : String(err),
     };

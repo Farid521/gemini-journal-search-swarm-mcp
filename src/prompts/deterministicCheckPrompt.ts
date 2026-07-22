@@ -15,6 +15,8 @@ Tugas: tentukan apakah dokumen ini relevan dengan QUERY dan memuat MINIMAL:
   benar benar merupakan sebuah artikel jurnal, yang berarti harus memiliki abstract, nama penulis dan atribut yang umumnya ada di
   artikel jurnal. Jika dokumen tidak memiliki kriteria sebuah artikel jurnal maka buat is_relevant: False karena anda akan
   menemui banyak sekali dokumen-dokumen berupa buku, instruksi lab, atau dokumen irelevan lainya.
+4. journal_title: ekstrak judul jurnal tempat artikel ini diterbitkan (bukan judul artikel). Contoh: "Journal of Physics Education" atau "Nature".
+5. apa_citation: buat sitasi APA style (edisi 7) untuk artikel ini berdasarkan metadata yang ditemukan di dokumen (penulis, tahun, judul artikel, nama jurnal, volume, issue, halaman, DOI). Jika metadata tidak mencukupi, isi null. Contoh: "Putra, A. B., & Sari, C. D. (2023). Pengaruh model pembelajaran terhadap hasil belajar. Jurnal Pendidikan Sains, 11(2), 45–58. https://doi.org/10.1234/jps.v11i2.5678"
 
 Contoh: jika QUERY = "hukum Ohm", maka has_basic_explanation harus true HANYA jika dokumen
 menjelaskan apa itu hukum Ohm (hubungan tegangan, arus, dan hambatan), dan has_basic_equations
@@ -35,7 +37,9 @@ export function buildFormatEnforcementBlock(): string {
   "has_basic_explanation": boolean,
   "has_basic_equations": boolean,
   "confidence": "high" | "medium" | "low",
-  "reason": "<maks 150 karakter, alasan singkat>"
+  "reason": "<maks 150 karakter, alasan singkat>",
+  "journal_title": "<judul jurnal, atau null jika tidak diketahui>",
+  "apa_citation": "<sitasi APA style edisi 7, atau null jika metadata tidak mencukupi>"
 }`;
 }
 
