@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { searchAndCheckJournalsInputSchema } from "../toolSchemas.js";
 import { tavilySearch } from "../../services/tavilyClient.js";
+import { exaSearch } from "../../services/exaClient.js";
 import { checkPdfMagicBytes } from "../../services/pdfMagicBytes.js";
 import { runJournalAnalysis } from "../../services/journalAnalysis.js";
 import { getConfig } from "../../config.js";
@@ -41,14 +42,35 @@ export async function handleSearchAndCheckJournals(
   const config = getConfig();
   const maxCandidates = input.max_candidates ?? config.defaultMaxCandidates;
 
-  // 1. Tavily search — ambil lebih banyak kandidat dari yang dibutuhkan.
+  // 1. Search — pilih provider berdasarkan search_provider
+  const searchProvider = input.search_provider ?? "tavily";
+
   let searchResults;
   try {
-    searchResults = await tavilySearch(config.tavilyApiKey, {
-      query: input.query,
-      max_results: maxCandidates * 2,
-      search_depth: input.search_depth ?? "basic",
-    });
+    if (searchProvider === "exa") {
+      if (!config.exaApiKey) {
+        return {
+          query: input.query,
+          total_candidates_checked: 0,
+          results: [],
+          error: "invalid_input",
+          error_detail:
+            "search_provider='exa' dipilih tapi EXA_API_KEY tidak di-set di environment server.",
+        };
+      }
+      // search_depth SENGAJA TIDAK diteruskan ke Exa — itu konsep khusus Tavily.
+      searchResults = await exaSearch(config.exaApiKey, {
+        query: input.query,
+        numResults: maxCandidates * 2,
+        type: input.exa_search_type ?? "auto",
+      });
+    } else {
+      searchResults = await tavilySearch(config.tavilyApiKey, {
+        query: input.query,
+        max_results: maxCandidates * 2,
+        search_depth: input.search_depth ?? "basic",
+      });
+    }
   } catch (err) {
     const code = err instanceof ToolError ? err.code : "upstream_search_failed";
     const detail = err instanceof ToolError ? err.detail : String(err);

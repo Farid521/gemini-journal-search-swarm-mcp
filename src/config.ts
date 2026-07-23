@@ -36,6 +36,12 @@ function optionalEnvNumber(name: string, fallback: number): number {
   return parsed;
 }
 
+function optionalEnvString(name: string): string | null {
+  const raw = process.env[name];
+  if (raw === undefined || raw.trim() === "") return null;
+  return raw.trim();
+}
+
 function parseGeminiKeys(raw: string | undefined): string[] {
   if (!raw || raw.trim() === "") {
     throw new ConfigError(
@@ -66,6 +72,7 @@ function parseGeminiKeys(raw: string | undefined): string[] {
 interface AppConfig {
   port: number;
   tavilyApiKey: string;
+  exaApiKey: string | null;
   geminiApiKeys: string[];
   geminiModel: string;
   maxCharsPerDoc: number;
@@ -84,12 +91,14 @@ function loadConfig(): AppConfig {
   // MCP_API_KEY wajib ada — fail-safe, server tidak boleh nyala tanpa auth (§10, §11).
   const mcpApiKey = requireEnv("MCP_API_KEY");
   const tavilyApiKey = requireEnv("TAVILY_API_KEY");
+  const exaApiKey = optionalEnvString("EXA_API_KEY");
   const geminiApiKeys = parseGeminiKeys(process.env.GEMINI_API_KEYS);
 
   return {
     // Prioritas: PORT (Render) -> MCP_PORT (lokal) -> 3000 (§14.3)
     port: optionalEnvNumber("PORT", optionalEnvNumber("MCP_PORT", 3000)),
     tavilyApiKey,
+    exaApiKey,
     geminiApiKeys,
     geminiModel: process.env.GEMINI_MODEL?.trim() || "gemini-3.1-flash-lite",
     maxCharsPerDoc: optionalEnvNumber("MAX_CHARS_PER_DOC", 15_000),

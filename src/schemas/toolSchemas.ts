@@ -40,5 +40,7 @@ export const analyzeJournalCustomInputSchema = z.object({
 export const searchAndCheckJournalsInputSchema = z.object({
   query: z.string().min(1, "query tidak boleh kosong"),
   max_candidates: z.number().int().positive().max(30).optional(),
+  search_provider: z.enum(["tavily", "exa"]).default("tavily"),
   search_depth: z.enum(["basic", "advanced"]).optional(),
+  exa_search_type: z.enum(["neural", "keyword", "auto"]).optional(),
 });

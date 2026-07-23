@@ -1,5 +1,5 @@
 import type { Express, Request, Response } from "express";
-import { ZodError, type ZodSchema } from "zod";
+import { ZodError, type ZodType, type ZodTypeDef } from "zod";
 import { authMiddleware } from "./authMiddleware.js";
 
 import { tavilySearchInputSchema, tavilyExtractInputSchema, tavilyCrawlInputSchema, verifyPdfInputSchema, analyzeJournalStandardInputSchema, analyzeJournalCustomInputSchema, searchAndCheckJournalsInputSchema } from "../schemas/toolSchemas.js";
@@ -13,7 +13,7 @@ import { handleAnalyzeJournalCustom } from "../schemas/tools/analyzeJournalCusto
 import { handleSearchAndCheckJournals } from "../schemas/tools/searchAndCheckJournals.js";
 
 function makePostRoute<TInput, TOutput>(
-  schema: ZodSchema<TInput>,
+  schema: ZodType<TInput, ZodTypeDef, any>,
   handler: (input: TInput) => Promise<TOutput>
 ) {
   return async (req: Request, res: Response) => {
