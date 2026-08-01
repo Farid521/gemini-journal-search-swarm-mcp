@@ -6,7 +6,10 @@ let instance: GeminiKeyPool | null = null;
 function ensureInstance(): GeminiKeyPool {
   if (!instance) {
     const config = getConfig();
-    instance = new GeminiKeyPool(config.geminiApiKeys, config.rateLimit);
+    instance = new GeminiKeyPool(config.geminiApiKeys, config.rateLimit, {
+      failureThreshold: config.circuitBreakerFailureThreshold,
+      cooldownMs: config.circuitBreakerCooldownMs,
+    });
   }
   return instance;
 }
@@ -19,6 +22,9 @@ function ensureInstance(): GeminiKeyPool {
 export const geminiKeyPool = {
   acquire: (estimatedTokens: number, maxWaitMs?: number) =>
     ensureInstance().acquire(estimatedTokens, maxWaitMs),
+  recordSuccess: () => ensureInstance().recordSuccess(),
+  recordFailure: () => ensureInstance().recordFailure(),
+  getCircuitStats: () => ensureInstance().getCircuitStats(),
   getStats: () => ensureInstance().getStats(),
   get size(): number {
     return ensureInstance().size;

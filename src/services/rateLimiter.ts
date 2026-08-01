@@ -60,6 +60,7 @@ export class SlidingWindowLimiter {
       return { ok: false };
     }
 
+    // EX: [{ timestamp: 1690886465000, tokens: 25 }, { timestamp: 1690886523000, tokens: 5 }, { timestamp: 1690886531000, tokens: 10 }]
     const record: RequestRecord = { timestamp: now, tokens: estimatedTokens };
     this.records.push(record);
 

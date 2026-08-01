@@ -85,6 +85,20 @@ interface AppConfig {
   geminiKeyMaxWaitMs: number;
   mcpApiKey: string;
   mcpIconUrl: string | null;
+  /** Maks jumlah PDF yang boleh didownload secara bersamaan (default: 3). */
+  maxConcurrentDownloads: number;
+  /** Maks total bytes PDF yang boleh aktif di memory secara bersamaan (default: 100MB). */
+  maxTotalDownloadBytes: number;
+  /** Maks ukuran satu file PDF yang boleh didownload (default: 20MB). */
+  maxDownloadBytesPerFile: number;
+  /** Timeout menunggu slot download semaphore (ms, default: 30000). */
+  downloadSemaphoreTimeoutMs: number;
+  /** Timeout per panggilan HTTP ke Gemini API (ms, default: 15000). */
+  geminiCallTimeoutMs: number;
+  /** Batas kegagalan beruntun sebelum Circuit Breaker OPEN (default: 3). */
+  circuitBreakerFailureThreshold: number;
+  /** Masa cooldown saat Circuit Breaker OPEN (ms, default: 60000). */
+  circuitBreakerCooldownMs: number;
 }
 
 function loadConfig(): AppConfig {
@@ -111,6 +125,13 @@ function loadConfig(): AppConfig {
     geminiKeyMaxWaitMs: optionalEnvNumber("GEMINI_KEY_MAX_WAIT_MS", 90_000),
     mcpApiKey,
     mcpIconUrl: process.env.MCP_ICON_URL?.trim() || null,
+    maxConcurrentDownloads: optionalEnvNumber("MAX_CONCURRENT_DOWNLOADS", 3),
+    maxTotalDownloadBytes: optionalEnvNumber("MAX_TOTAL_DOWNLOAD_BYTES", 100 * 1024 * 1024),
+    maxDownloadBytesPerFile: optionalEnvNumber("MAX_DOWNLOAD_BYTES_PER_FILE", 20 * 1024 * 1024),
+    downloadSemaphoreTimeoutMs: optionalEnvNumber("DOWNLOAD_SEMAPHORE_TIMEOUT_MS", 30_000),
+    geminiCallTimeoutMs: optionalEnvNumber("GEMINI_CALL_TIMEOUT_MS", 15_000),
+    circuitBreakerFailureThreshold: optionalEnvNumber("CIRCUIT_BREAKER_FAILURE_THRESHOLD", 3),
+    circuitBreakerCooldownMs: optionalEnvNumber("CIRCUIT_BREAKER_COOLDOWN_MS", 60_000),
   };
 }
 

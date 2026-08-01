@@ -1,8 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { ToolError, type GeminiJudgeResult } from "../types.js";
 import { buildStrictJsonRetryInstruction } from "../prompts/deterministicCheckPrompt.js";
+import { getConfig } from "../config.js";
 
-const GEMINI_CALL_TIMEOUT_MS = 30_000;
 // Estimasi kasar token: ~4 karakter per token (dipakai untuk reserve() sebelum
 // tahu usage aktual dari response).
 const CHARS_PER_TOKEN_ESTIMATE = 4;
@@ -45,8 +45,9 @@ async function callGeminiRaw(
   model: string,
   prompt: string
 ): Promise<{ text: string; usedTokens: number }> {
+  const timeoutMs = getConfig().geminiCallTimeoutMs;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), GEMINI_CALL_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
@@ -72,7 +73,7 @@ async function callGeminiRaw(
     throw new ToolError(
       "gemini_call_failed",
       isAbort
-        ? `Gemini call timeout setelah ${GEMINI_CALL_TIMEOUT_MS}ms`
+        ? `Gemini call timeout setelah ${timeoutMs}ms`
         : `Gemini call gagal: ${err instanceof Error ? err.message : String(err)}`
     );
   } finally {

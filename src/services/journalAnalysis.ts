@@ -46,6 +46,7 @@ interface RunAnalysisOpts {
  * Pipeline lengkap: verify PDF -> extract text -> pilih worker -> panggil Gemini
  * -> return JSON pendek (§7.5, §7.6). Tidak pernah throw — semua kegagalan
  * dibungkus ke field `error`/`error_detail` pada output, sesuai konvensi §11.
+ * analyze single journal
  */
 export async function runJournalAnalysis(
   opts: RunAnalysisOpts
@@ -106,8 +107,8 @@ export async function runJournalAnalysis(
 
   // 3. Pilih worker & bangun prompt
   const worker: WorkerId = opts.forceCustomWorker
-    ? workerPool.getCustomWorker()
-    : workerPool.getStandardWorker();
+    ? workerPool.getCustomWorker() // gemini-3 worker
+    : workerPool.getStandardWorker(); // gemini 1 or 2 worker
 
   const prompt = opts.forceCustomWorker
     ? buildCustomPrompt(opts.query, extracted.text, maxChars, opts.customInstruction)
@@ -141,6 +142,7 @@ export async function runJournalAnalysis(
       prompt
     );
     acquired.settle(usedTokens);
+    geminiKeyPool.recordSuccess();
 
     const output: AnalyzeJournalOutput = {
       url: opts.url,
@@ -171,6 +173,8 @@ export async function runJournalAnalysis(
   } catch (err) {
     // Call gagal setelah reservasi -> release supaya kuota tidak "bocor".
     acquired.release();
+    geminiKeyPool.recordFailure();
+
     const code = err instanceof ToolError ? err.code : "gemini_call_failed";
     const detail = err instanceof ToolError ? err.detail : String(err);
     return {
