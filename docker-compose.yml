@@ -1,0 +1,22 @@
+services:
+  journal-search-mcp:
+    build: .
+    image: journal-search-mcp:latest
+    container_name: journal-search-mcp
+    # .env dipakai sebagai sumber secret — jangan commit file .env ke repo.
+    env_file:
+      - .env
+    environment:
+      # Samakan port internal container dengan EXPOSE di Dockerfile.
+      # config.ts prioritas: PORT > MCP_PORT > 3000
+      PORT: 3000
+    ports:
+      # Host:Container — ubah "5000" kalau port host bentrok.
+      - "${HOST_PORT:-5000}:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
